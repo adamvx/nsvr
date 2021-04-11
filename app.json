@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "nsvr",
+    "name": "NSVR",
     "slug": "nsvr",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,16 +17,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "sk.adamvician.nsvr",
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      },
+      "package": "sk.adamvician.nsvr",
+      "versionCode": 1
     }
   }
 }
