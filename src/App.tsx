@@ -1,41 +1,40 @@
 import * as eva from '@eva-design/eva';
-import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
+import { ApplicationProvider, IconRegistry, Layout } from '@ui-kitten/components';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
+import Constants from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import "reflect-metadata";
-import { Connection } from 'typeorm';
 import { makeDatabaseConnection } from './database';
-import Settings from './database/Settings';
-import { initFirebase } from './firebase';
+import * as Settings from './database/Settings';
 import Navigator from './Navigator';
+import { EEvnentType } from './types';
+import * as Events from './utils/events'
 
 function App() {
 
   const [loading, setLoading] = useState(true);
-  const [connection, setConnection] = useState<Connection>()
+  const [isDarkMode, setDarkMode] = useState<boolean>(false)
 
   useEffect(() => {
-    console.log('EFFFFEFEFEFEFFCSCT')
 
-
-    makeDatabaseConnection().then(async connection => {
-      setConnection(connection)
-      try {
-        const res = await Settings.find({});
-        if (res.length === 0) {
-          const settings = new Settings();
-          settings.pin = 1111;
-          await settings.save()
-        }
-      } catch (err) {
-        console.error(err)
-      }
+    Events.subscribe(EEvnentType.DarkMode, loadSettings)
+    makeDatabaseConnection().then(async con => {
+      await loadSettings()
       setLoading(false)
-    });
-    () => connection?.close()
+    }).catch(console.error);
+
   }, [])
+
+  const loadSettings = async () => {
+    try {
+      const res = await Settings.findOrCreate()
+      setDarkMode(res.darkMode)
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   if (loading) {
     return <View />
@@ -44,8 +43,9 @@ function App() {
   return (
     <>
       <IconRegistry icons={EvaIconsPack} />
-      <StatusBar style={'auto'} />
-      <ApplicationProvider {...eva} theme={eva.light}>
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+      <ApplicationProvider {...eva} theme={isDarkMode ? eva.dark : eva.light}>
+        <Layout style={{ height: Constants.statusBarHeight }} />
         <Navigator />
       </ApplicationProvider>
     </>

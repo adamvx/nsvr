@@ -40,5 +40,10 @@ export interface IBackup {
 export interface ISettings {
   id: number;
   pin: number;
+  darkMode: boolean;
   createdAt: Date;
+}
+
+export enum EEvnentType {
+  DarkMode = 'DarkMode'
 }

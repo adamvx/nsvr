@@ -16,6 +16,7 @@
     "@types/node": "^14.14.37",
     "@ui-kitten/components": "^5.0.0",
     "@ui-kitten/eva-icons": "^5.0.0",
+    "events": "^3.3.0",
     "expo": "~40.0.0",
     "expo-file-system": "~9.3.0",
     "expo-sqlite": "~8.5.0",

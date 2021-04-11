@@ -49,7 +49,7 @@ const AddUserScreen: React.FC<Props> = ({ navigation, route }) => {
     if (isEdit && !loadedUser) {
       return (
         <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-          <ActivityIndicator animating={true} />
+          <ActivityIndicator size='small' color='gray' animating={true} />
         </View>
       )
     } else {
@@ -144,7 +144,7 @@ const AddUserScreen: React.FC<Props> = ({ navigation, route }) => {
           alignment='center'
         />
         <Divider />
-        <Layout style={{ flex: 1, padding: 16 }}>
+        <Layout level='2' style={{ flex: 1, padding: 16 }}>
           {renderContent()}
         </Layout>
       </SafeAreaView>

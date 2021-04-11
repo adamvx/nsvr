@@ -1,16 +1,17 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import { Button, Card, Divider, Icon, Layout, List, Modal, Text, TopNavigation } from '@ui-kitten/components';
-import React, { useState } from 'react';
-import { ActivityIndicator, Alert, SafeAreaView, StyleSheet } from 'react-native';
+import { Divider, Icon, Layout, Text, TopNavigation } from '@ui-kitten/components';
+import Constants from 'expo-constants';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, SafeAreaView, StyleSheet, Switch, View } from 'react-native';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import Order from '../database/Order';
-import Settings from '../database/Settings';
+import Settings, { findLatest } from '../database/Settings';
 import User from '../database/User';
 import { downloadDataFirebase, uploadDataFirebase } from '../firebase';
 import { mapUserToBackup } from '../firebase/backup';
 import { RootParamList } from '../Navigator';
-import { IBackup } from '../types';
-import Constants from 'expo-constants';
+import { EEvnentType, ISettings } from '../types';
+import * as Events from '../utils/events';
 
 type Props = StackScreenProps<RootParamList, 'Settings'>;
 
@@ -24,43 +25,36 @@ const data: ISettingItem[] = [
   { id: 0, icon: 'unlock-outline', title: 'Zmeniť PIN kódu' },
   { id: 1, icon: 'cloud-upload-outline', title: 'Zálohovať dáta' },
   { id: 2, icon: 'download-outline', title: 'Obnoviť dáta zo zálohy' },
+  { id: 3, icon: 'moon-outline', title: 'Tmavý motív' },
 ]
 
 const SettingsScreen: React.FC<Props> = ({ navigation }) => {
 
   const [loadingIds, setLoadingIds] = useState<number[]>([])
+  const [settings, setSettings] = useState<ISettings>()
+
+  useEffect(() => {
+    loadSettings()
+  }, [])
+
+  const loadSettings = () => {
+    findLatest().then(settings => {
+      setSettings(settings)
+    }).catch(console.error)
+  }
 
   const changePin = () => {
-    Alert.prompt(
-      "Zadajte PIN",
-      "Zadajte nový 4 miestny PIN kód",
-      [
-        {
-          text: "Zrušiť",
-          style: "cancel"
-        },
-        {
-          text: "Potvrdiť",
-          onPress: validateAndSavePin
-        }
-      ],
-      'secure-text',
-      undefined,
-      'numeric'
-    );
+    navigation.navigate('ChangePin')
   }
 
-  const validateAndSavePin = async (pin: string | undefined) => {
-    if (!pin || pin.length !== 4) {
-      Alert.alert('Chyba', 'Zadali ste zlý PIN kód')
-      return;
-    }
+  const onDarkModeToggle = async (val: boolean) => {
     const res = new Settings()
-    res.pin = parseInt(pin)
+    res.pin = settings?.pin || 1111
+    res.darkMode = val
     await res.save();
-    Alert.alert('PIN zmenený', 'Váš PIN bol úspešne zmenený')
+    Events.publish(EEvnentType.DarkMode, null)
+    loadSettings()
   }
-
 
   const uploadData = async (id: number) => {
     if (loadingIds.includes(id)) {
@@ -160,15 +154,27 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
     }
   }
 
+  const renderSettingsSwitchItem = (item: ISettingItem) => {
+    return (
+      <View >
+        <Layout style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}>
+          <Icon name={item.icon} style={{ width: 24, height: 24, tintColor: 'gray', marginRight: 24 }} />
+          <Text style={{ flex: 1 }}>{item.title}</Text>
+          <Switch value={settings?.darkMode || false} onValueChange={onDarkModeToggle} />
+        </Layout>
+        <Divider />
+      </View>
+    )
+  }
+
   const renderSettingsItem = (item: ISettingItem) => {
     return (
       <TouchableOpacity onPress={() => onItemPress(item.id)}>
         <Layout style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}>
           <Icon name={item.icon} style={{ width: 24, height: 24, tintColor: 'gray', marginRight: 24 }} />
           <Text style={{ flex: 1 }}>{item.title}</Text>
-          <ActivityIndicator animating={loadingIds.includes(item.id)} />
+          <ActivityIndicator size='small' color='gray' animating={loadingIds.includes(item.id)} />
         </Layout>
-        <Divider />
       </TouchableOpacity>
     )
   }
@@ -176,7 +182,7 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const renderAppInfo = () => {
     return (
       <Layout level='2' style={{ padding: 16, alignItems: 'center' }}>
-        <Text appearance='hint' category='s1' style={{ marginBottom: 4 }}>{'NVSR'}</Text>
+        <Text appearance='hint' category='s1' style={{ marginBottom: 4 }}>{'Aplikácia NVSR'}</Text>
         <Text appearance='hint'>{'Verzia: ' + Constants.manifest.version}</Text>
       </Layout>
     )
@@ -190,9 +196,18 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
         <Layout level='2' style={{ flex: 1 }}>
           <ScrollView>
             <Layout level='2'>
+              <Text category='s1' style={{ padding: 16 }}>Všeobecné nastavenia</Text>
+              <Divider />
               {renderSettingsItem(data[0])}
+              <Divider />
               {renderSettingsItem(data[1])}
+              <Divider />
               {renderSettingsItem(data[2])}
+              <Divider />
+              <Text category='s1' style={{ padding: 16 }}>Doplnkové nastavenia</Text>
+              <Divider />
+              {renderSettingsSwitchItem(data[3])}
+              <Divider />
               {renderAppInfo()}
             </Layout>
           </ScrollView>

@@ -23,6 +23,7 @@ type UserInput = {
 
 const AddOrderScreen: React.FC<Props> = ({ navigation, route }) => {
 
+
   const initialValues: UserInput = {
     volume: '',
     price: '',
@@ -56,7 +57,7 @@ const AddOrderScreen: React.FC<Props> = ({ navigation, route }) => {
           alignment='center'
         />
         <Divider />
-        <Layout style={{ flex: 1, padding: 16 }}>
+        <Layout level='2' style={{ flex: 1, padding: 16 }}>
           <Formik
             validationSchema={addOrderSchema}
             initialValues={initialValues}

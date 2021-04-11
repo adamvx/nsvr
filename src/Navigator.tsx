@@ -1,17 +1,20 @@
 import { BottomTabBarOptions, BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { BottomNavigation, BottomNavigationTab, Layout } from '@ui-kitten/components';
 import React from 'react';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AddOrderScreen from './screens/AddOrderScreen';
 import AddUserScreen from './screens/AddUserScreen';
+import ChangePinScreen from './screens/ChangePinScreen';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import OrdersScreen from './screens/OrdersScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import UserScreen from './screens/UserScreen';
 import { PersonIcon, RideIcon, SettingsIcon } from './utils/icons';
+import { useKeyboard } from './utils/useKeyboard';
 
 export type RootParamList = {
   Login: undefined;
@@ -20,6 +23,7 @@ export type RootParamList = {
   Orders: undefined;
   Settings: undefined;
   Home: undefined;
+  ChangePin: undefined;
   AddUser: { userId: number } | undefined;
   User: { userId: number };
   AddOrder: { userId: number };
@@ -30,6 +34,10 @@ const Tab = createBottomTabNavigator<RootParamList>();
 
 const BottomTabBar = ({ navigation, state }: BottomTabBarProps<BottomTabBarOptions>) => {
   const insets = useSafeAreaInsets();
+  const shown = useKeyboard();
+  if (shown) {
+    return <View></View>
+  }
   return (
     <Layout>
       <BottomNavigation
@@ -44,13 +52,23 @@ const BottomTabBar = ({ navigation, state }: BottomTabBarProps<BottomTabBarOptio
   )
 }
 
+const Navigator: React.FC = () => {
+  return (
+    <NavigationContainer theme={DarkTheme}>
+      <Stack.Navigator mode='modal' headerMode='none' >
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="MainMenu" component={MainMenuNavigator} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 
 const MainMenuNavigator: React.FC = () => {
   return (
     <Tab.Navigator tabBar={props => <BottomTabBar {...props} />}>
       <Tab.Screen name="Users" component={UserNavigator} />
       <Tab.Screen name="Orders" component={OrdersScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Settings" component={SettingsNavigator} />
     </Tab.Navigator>
   )
 }
@@ -66,15 +84,13 @@ const UserNavigator: React.FC = () => {
   )
 }
 
-const Navigator: React.FC = () => {
+const SettingsNavigator: React.FC = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator mode='modal' headerMode='none' >
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="MainMenu" component={MainMenuNavigator} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+    <Stack.Navigator mode='modal' headerMode='none' >
+      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="ChangePin" component={ChangePinScreen} />
+    </Stack.Navigator>
+  )
 }
 
 export default Navigator

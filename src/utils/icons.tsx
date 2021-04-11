@@ -45,3 +45,7 @@ export const DeleteIcon = (props?: Partial<ImageProps>) => {
 export const EditIcon = (props?: Partial<ImageProps>) => {
   return <Icon name='edit-outline' {...props} />
 }
+
+export const CloseIcon = (props?: Partial<ImageProps>) => {
+  return <Icon name='close-outline' {...props} />
+}

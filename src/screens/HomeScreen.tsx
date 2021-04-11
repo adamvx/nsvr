@@ -1,12 +1,15 @@
 import { useIsFocused } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
-import { Divider, Icon, Input, Layout, List, ListItem, Text, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
+import { Divider, Icon, Input, Layout, List, Text, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
-import { ImageProps, SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import User from '../database/User';
 import { RootParamList } from '../Navigator';
 import { IUser } from '../types';
-import { AddIcon, SearchIcon, UserIcon } from '../utils/icons';
+import { AddIcon, SearchIcon } from '../utils/icons';
+
+import Constants from 'expo-constants';
+
 
 type Props = StackScreenProps<RootParamList, 'Home'>;
 
@@ -74,7 +77,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 <Layout style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}>
                   <Icon name={'person-outline'} style={{ width: 24, height: 24, tintColor: 'gray', marginRight: 16 }} />
                   <View>
-                    <Text style={{ marginBottom: 2 }} category='s1'>{user.firstName + " " + user.lastName}</Text>
+                    <Text style={{ marginBottom: 2, fontWeight: 'bold' }} category='s1'>{user.firstName + " " + user.lastName}</Text>
                     <Text>{`${user.city} - ${user.address}`}</Text>
                   </View>
                 </Layout>
