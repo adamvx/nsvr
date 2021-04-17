@@ -1,10 +1,10 @@
-class NoBackupInFirebaseError extends Error {
+export class NoBackupInFirebaseError extends Error {
   constructor() {
     super()
   }
 }
 
-class NoDataToSyncError extends Error {
+export class NoDataToSyncError extends Error {
   constructor() {
     super()
   }

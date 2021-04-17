@@ -1,8 +1,6 @@
-import { type } from 'node:os';
-import { BaseEntity, Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { IOrder, IUser } from '../types';
 import User from './User';
-
 
 @Entity()
 export default class Order extends BaseEntity implements IOrder {

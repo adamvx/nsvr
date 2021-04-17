@@ -2,7 +2,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { Button, Divider, Input, Layout, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 import { Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, SafeAreaView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, SafeAreaView, StyleSheet, View } from 'react-native';
 import User from '../database/User';
 import { RootParamList } from '../Navigator';
 import { BackIcon } from '../utils/icons';
@@ -40,8 +40,15 @@ const AddUserScreen: React.FC<Props> = ({ navigation, route }) => {
     user.city = city ?? ""
     user.postCode = postCode ?? ""
     user.address = address ?? ""
-    await user.save()
-    navigation.goBack()
+    user.orders = []
+    try {
+      await user.save()
+      navigation.goBack()
+    } catch (err) {
+      Alert.alert('User', JSON.stringify(user))
+      Alert.alert('Err', err.name + " " + err.message + " " + err.stack)
+    }
+
   }
 
 

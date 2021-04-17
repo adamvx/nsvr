@@ -49,3 +49,7 @@ export const EditIcon = (props?: Partial<ImageProps>) => {
 export const CloseIcon = (props?: Partial<ImageProps>) => {
   return <Icon name='close-outline' {...props} />
 }
+
+export const HelpIcon = (props?: Partial<ImageProps>) => {
+  return <Icon name='question-mark-circle-outline' {...props} />
+}

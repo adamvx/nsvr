@@ -1,10 +1,11 @@
 import firebase from 'firebase';
-import "firebase/storage";
-import "firebase/firestore";
 import "firebase/auth";
+import "firebase/firestore";
+import "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 import { IBackup } from '../types';
 import { createBackupFile } from './backup';
+import { NoBackupInFirebaseError } from './errors';
 
 interface IFirebaseBackup {
   path: string;
@@ -20,6 +21,11 @@ const firebaseConfig = {
   appId: "1:286210174159:web:9faf3c70fdd89e8e109bba",
   measurementId: "G-ZRGG1DPQQD"
 };
+
+const authData = {
+  email: 'admin@nsvr.sk',
+  password: 'for20/greenHat'
+}
 
 export const initFirebase = () => {
   firebase.initializeApp(firebaseConfig);
@@ -42,16 +48,15 @@ const findLatestItem = async () => {
 }
 
 export const downloadDataFirebase = async () => {
-  await firebase.auth().signInAnonymously()
+  await firebase.auth().signInWithEmailAndPassword(authData.email, authData.password)
   const item = await findLatestItem()
-  console.log(item.createdAt)
   const res = await fetch(item.path)
   const json = await res.json()
   return json as IBackup;
 }
 
 export const uploadDataFirebase = async (data: IBackup) => {
-  await firebase.auth().signInAnonymously()
+  await firebase.auth().signInWithEmailAndPassword(authData.email, authData.password)
   const fileName = uuidv4() + '.json';
 
   const storageRef = firebase.storage().ref(fileName);

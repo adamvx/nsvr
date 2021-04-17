@@ -9,6 +9,7 @@ import Settings, { findLatest } from '../database/Settings';
 import User from '../database/User';
 import { downloadDataFirebase, uploadDataFirebase } from '../firebase';
 import { mapUserToBackup } from '../firebase/backup';
+import { NoBackupInFirebaseError, NoDataToSyncError } from '../firebase/errors';
 import { RootParamList } from '../Navigator';
 import { EEvnentType, ISettings } from '../types';
 import * as Events from '../utils/events';
@@ -93,12 +94,17 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
       for (const backupUser of result.users) {
         const user = new User()
         user.firstName = backupUser.firstName;
-        user.lastName = backupUser.lastName
-        user.phoneNumber = backupUser.phoneNumber
-        user.city = backupUser.city
-        user.postCode = backupUser.postCode
-        user.address = backupUser.address
-        await user.save()
+        user.lastName = backupUser.lastName;
+        user.phoneNumber = backupUser.phoneNumber;
+        user.city = backupUser.city;
+        user.postCode = backupUser.postCode;
+        user.address = backupUser.address;
+        try {
+          await user.save()
+        } catch (err) {
+          Alert.alert('User', JSON.stringify(backupUser))
+          Alert.alert('Err', err.name + " " + err.message + " " + err.stack)
+        }
 
         for (const backupOrder of backupUser.orders) {
           const order = new Order()
@@ -182,7 +188,7 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const renderAppInfo = () => {
     return (
       <Layout level='2' style={{ padding: 16, alignItems: 'center' }}>
-        <Text appearance='hint' category='s1' style={{ marginBottom: 4 }}>{'Aplikácia NVSR'}</Text>
+        <Text appearance='hint' category='s1' style={{ marginBottom: 4 }}>{'Aplikácia NSVR'}</Text>
         <Text appearance='hint'>{'Verzia: ' + Constants.manifest.version}</Text>
       </Layout>
     )

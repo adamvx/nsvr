@@ -15,7 +15,6 @@ import { AddIcon, BackIcon, CallIcon, DeleteIcon, EditIcon, UserIcon } from '../
 type Props = StackScreenProps<RootParamList, 'User'>;
 
 const UserSecreen: React.FC<Props> = ({ navigation, route }) => {
-  console.log(route)
   const userId = route.params.userId;
   const [user, setUser] = useState<IUser>()
 
@@ -56,10 +55,25 @@ const UserSecreen: React.FC<Props> = ({ navigation, route }) => {
       'Vymažete spolu s ním aj všetky jeho záznamy. Táto operácia je nenávratná!',
       [
         {
-          text: 'Áno', style: 'destructive', onPress: () => {
-            User.delete({ id: userId })
-              .then(() => navigation.pop())
-              .catch(() => Alert.alert('Vyskytla sa chyba', 'Z nejakého dôvodu sa nepodaril požívateľ vymazať'))
+          text: 'Áno', style: 'destructive', onPress: async () => {
+
+            try {
+              const user = await User.findOne({ id: userId });
+              if (!user) {
+                Alert.alert('Vyskytla sa chyba', 'Z nejakého dôvodu sa nepodaril požívateľ vymazať')
+                return;
+              }
+              await Order.delete({ user: user })
+            } catch (err) {
+              Alert.alert('Vyskytla sa chyba', 'Z nejakého dôvodu sa nepodarili vymazať objednávky a následne celá zložka zákazníka')
+            }
+            try {
+              await User.delete({ id: userId });
+              navigation.pop()
+            } catch (err) {
+              Alert.alert('Vyskytla sa chyba', 'Z nejakého dôvodu sa nepodaril požívateľ vymazať')
+            }
+
           }
         },
         { text: 'Nie' }

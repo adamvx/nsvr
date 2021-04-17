@@ -3,6 +3,7 @@ import { ApplicationProvider, IconRegistry, Layout } from '@ui-kitten/components
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import Constants from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import "reflect-metadata";
@@ -10,7 +11,8 @@ import { makeDatabaseConnection } from './database';
 import * as Settings from './database/Settings';
 import Navigator from './Navigator';
 import { EEvnentType } from './types';
-import * as Events from './utils/events'
+import * as Events from './utils/events';
+import 'moment/locale/sk'
 
 function App() {
 
@@ -18,7 +20,7 @@ function App() {
   const [isDarkMode, setDarkMode] = useState<boolean>(false)
 
   useEffect(() => {
-
+    moment.locale('sk')
     Events.subscribe(EEvnentType.DarkMode, loadSettings)
     makeDatabaseConnection().then(async con => {
       await loadSettings()
