@@ -8,9 +8,6 @@ import { RootParamList } from '../Navigator';
 import { IUser } from '../types';
 import { AddIcon, SearchIcon } from '../utils/icons';
 
-import Constants from 'expo-constants';
-
-
 type Props = StackScreenProps<RootParamList, 'Home'>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {

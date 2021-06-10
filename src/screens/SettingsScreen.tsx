@@ -102,8 +102,8 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
         try {
           await user.save()
         } catch (err) {
-          Alert.alert('User', JSON.stringify(backupUser))
-          Alert.alert('Err', err.name + " " + err.message + " " + err.stack)
+          Alert.alert('Err', err.name + " " + err.message)
+          return;
         }
 
         for (const backupOrder of backupUser.orders) {
@@ -114,7 +114,11 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
           order.date = backupOrder.date
           order.note = backupOrder.note
           order.user = user
-          await order.save();
+          try {
+            await order.save()
+          } catch (err) {
+            Alert.alert('Order error', err.name + " " + err.message)
+          }
         }
       }
       Alert.alert('Obnova dokončená', 'Obnova zo zálohy prebehla úspešne')
