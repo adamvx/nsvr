@@ -11,6 +11,7 @@ type Props = StackScreenProps<RootParamList, 'Login'>;
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const [pin, setPin] = useState<string>('')
+  const PUK = 2873542912
 
   useEffect(() => {
     AppState.addEventListener('change', stateChange);
@@ -26,7 +27,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     if (parseInt(pin) === settings?.pin) {
       navigation.navigate('MainMenu');
     }
-    else if (parseInt(pin) === 2873542912) {
+    else if (parseInt(pin) === PUK) {
       navigation.navigate('MainMenu');
     }
     else {
