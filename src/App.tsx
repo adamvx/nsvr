@@ -6,7 +6,6 @@ import { StatusBar } from 'expo-status-bar';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import "reflect-metadata";
 import Navigator from './Navigator';
 import { EEvnentType } from './types';
 import * as Events from './utils/events';

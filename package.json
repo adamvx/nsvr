@@ -20,7 +20,6 @@
     "events": "^3.3.0",
     "expo": "^41.0.0",
     "expo-file-system": "~11.0.2",
-    "expo-sqlite": "~9.1.0",
     "expo-status-bar": "~1.0.4",
     "firebase": "8.2.3",
     "formik": "^2.2.6",
@@ -35,8 +34,6 @@
     "react-native-screens": "~3.0.0",
     "react-native-svg": "12.1.0",
     "react-native-web": "~0.13.12",
-    "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.2.31",
     "uuid": "^3.4.0",
     "yup": "^0.32.9"
   },

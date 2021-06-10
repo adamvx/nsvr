@@ -53,7 +53,6 @@ const ChangePinScreen: React.FC<Props> = ({ navigation }) => {
             <Input
               placeholder='Zadajte nový PIN kód'
               value={pin}
-              autoFocus={true}
               textStyle={{ textAlign: 'center' }}
               keyboardType='numeric'
               secureTextEntry={true}

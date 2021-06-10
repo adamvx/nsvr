@@ -51,7 +51,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
               <Input
                 placeholder='Zadajte pin kód'
                 value={pin}
-                autoFocus={true}
                 textStyle={{ textAlign: 'center' }}
                 keyboardType='numeric'
                 secureTextEntry={true}
