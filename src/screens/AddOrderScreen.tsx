@@ -3,15 +3,14 @@ import { Button, Datepicker, Divider, I18nConfig, Icon, Input, Layout, NativeDat
 import { Formik } from 'formik';
 import React from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
-import Order from '../database/Order';
-import User from '../database/User';
 import { RootParamList } from '../Navigator';
 import { BackIcon } from '../utils/icons';
 import { addOrderSchema } from '../utils/validationSchemas';
-
+import { IOrder } from '../types';
+import * as Store from '../database/store'
+import { v4 as uuid } from 'uuid';
 
 type Props = StackScreenProps<RootParamList, 'AddOrder'>;
-
 
 type UserInput = {
   volume: string,
@@ -33,18 +32,16 @@ const AddOrderScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   const save = async (volume: string, price: string, date: Date, ticketId?: string, note?: string) => {
-    const user = await User.findOne(route.params.userId)
-    if (user) {
-      const order = new Order()
-      order.volume = parseInt(volume ?? "")
-      order.price = parseInt(price ?? "")
-      order.ticketId = ticketId ?? null
-      order.date = date
-      order.note = note ?? null
-      order.user = user
-      await order.save();
-      navigation.goBack()
+    const order: IOrder = {
+      id: uuid(),
+      volume: parseInt(volume ?? ""),
+      price: parseInt(price ?? ""),
+      ticketId: ticketId ?? null,
+      date: date,
+      note: note ?? null,
     }
+    await Store.addOrder(route.params.userId, order)
+    navigation.goBack()
   }
 
 

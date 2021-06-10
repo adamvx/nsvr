@@ -6,8 +6,7 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, SafeAreaView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Order from '../database/Order';
-import User from '../database/User';
+import * as Store from '../database/store';
 import { RootParamList } from '../Navigator';
 import { IOrder, IUser } from '../types';
 import { AddIcon, BackIcon, CallIcon, DeleteIcon, EditIcon, UserIcon } from '../utils/icons';
@@ -26,7 +25,7 @@ const UserSecreen: React.FC<Props> = ({ navigation, route }) => {
   }, [isFocused, userId])
 
   const reloadData = () => {
-    User.findOne(userId, { relations: ["orders"] }).then(user => setUser(user)).catch(err => console.log(err))
+    Store.findUser(userId).then(user => setUser(user)).catch(err => console.log(err))
   }
 
   const callPerson = () => {
@@ -56,19 +55,8 @@ const UserSecreen: React.FC<Props> = ({ navigation, route }) => {
       [
         {
           text: 'Áno', style: 'destructive', onPress: async () => {
-
             try {
-              const user = await User.findOne({ id: userId });
-              if (!user) {
-                Alert.alert('Vyskytla sa chyba', 'Z nejakého dôvodu sa nepodaril požívateľ vymazať')
-                return;
-              }
-              await Order.delete({ user: user })
-            } catch (err) {
-              Alert.alert('Vyskytla sa chyba', 'Z nejakého dôvodu sa nepodarili vymazať objednávky a následne celá zložka zákazníka')
-            }
-            try {
-              await User.delete({ id: userId });
+              await Store.deleteUser(userId);
               navigation.pop()
             } catch (err) {
               Alert.alert('Vyskytla sa chyba', 'Z nejakého dôvodu sa nepodaril požívateľ vymazať')
@@ -80,14 +68,14 @@ const UserSecreen: React.FC<Props> = ({ navigation, route }) => {
       ])
   }
 
-  const onDeleteOrder = (id: number) => {
+  const onDeleteOrder = (id: string) => {
     Alert.alert(
       'Potvrdenie vymazania',
       'Naozaj chcete tento záznam vymazať? Táto operácia je nenávratná',
       [
         {
           text: 'Áno', style: 'destructive', onPress: () => {
-            Order.delete({ id: id })
+            Store.deleteOrder(id)
               .then(() => reloadData())
               .catch(() => Alert.alert('Vyskytla sa chyba', 'Z nejakého dôvodu sa nepodaril záznam vymazať'))
           }

@@ -2,9 +2,11 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { Button, Divider, Input, Layout, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet } from 'react-native';
-import Settings, { findLatest } from '../database/Settings';
 import { RootParamList } from '../Navigator';
 import { CloseIcon } from '../utils/icons';
+import * as Store from '../database/store'
+import { ISettings } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 
 type Props = StackScreenProps<RootParamList, 'ChangePin'>;
 
@@ -18,11 +20,14 @@ const ChangePinScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
     try {
-      const oldSettings = await findLatest()
-      const res = new Settings()
-      res.pin = parseInt(pin)
-      res.darkMode = oldSettings?.darkMode || false
-      await res.save();
+      const oldSettings = await Store.loadSettings()
+      const res: ISettings = {
+        id: uuidv4(),
+        pin: parseInt(pin),
+        darkMode: oldSettings?.darkMode || false
+      }
+
+      await Store.storeSettings(res)
       Alert.alert('PIN zmenený', 'Váš PIN bol úspešne zmenený', [{ text: 'OK', onPress: () => navigation.pop() }])
     } catch (err) {
       Alert.alert('Chyba', 'Pin sa z nejakej príčiny nepodarilo zmeniť')

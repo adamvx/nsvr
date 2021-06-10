@@ -1,16 +1,27 @@
 import { Button, Card, Text } from '@ui-kitten/components';
+import { parsePhoneNumber } from 'libphonenumber-js';
 import moment from 'moment';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { IOrder } from '../types';
+import { IOrder, IUser } from '../types';
 import { DeleteIcon } from '../utils/icons';
 
 type Props = {
   order: IOrder
+  user: IUser
   onDelete: () => void
 }
 
-const OrderItem: React.FC<Props> = ({ order, onDelete }) => {
+const OrderItem: React.FC<Props> = ({ order, user, onDelete }) => {
+
+  const formatNumber = (number?: string) => {
+    if (!number) return '';
+    try {
+      return parsePhoneNumber(number, 'SK').formatNational()
+    } catch (err) {
+      return number
+    }
+  }
 
   return (
     <Card
@@ -26,15 +37,15 @@ const OrderItem: React.FC<Props> = ({ order, onDelete }) => {
       }}>
       <View style={{ flexDirection: 'row', marginBottom: 4 }}>
         <Text category='s1'>Meno:</Text>
-        <Text style={{ marginLeft: 4 }}>{`${order.user?.firstName} ${order.user?.lastName}`}</Text>
+        <Text style={{ marginLeft: 4 }}>{`${user.firstName} ${user.lastName}`}</Text>
       </View>
       <View style={{ flexDirection: 'row', marginBottom: 4 }}>
         <Text category='s1'>Adresa:</Text>
-        <Text style={{ marginLeft: 4, flex: 1 }}>{`${order.user?.address}, ${order.user?.city}, ${order.user?.postCode}`}</Text>
+        <Text style={{ marginLeft: 4, flex: 1 }}>{`${user.address}, ${user.city}, ${user.postCode}`}</Text>
       </View>
       <View style={{ flexDirection: 'row', marginBottom: 16 }}>
         <Text category='s1'>Tel. číslo:</Text>
-        <Text style={{ marginLeft: 4 }}>{`${order.user?.phoneNumber}`}</Text>
+        <Text style={{ marginLeft: 4 }}>{`${formatNumber(user.phoneNumber)}`}</Text>
       </View>
 
       <View style={{ flexDirection: 'row', flex: 1, marginBottom: 4 }}>

@@ -4,17 +4,18 @@ import { Divider, Input, InputProps, Layout, List, Text, Tooltip, TopNavigation 
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { Alert, ImageProps, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
-import Order from '../database/Order';
 import { RootParamList } from '../Navigator';
-import { IOrder } from '../types';
+import { IOrder, IUser } from '../types';
 import { HelpIcon, SearchIcon } from '../utils/icons';
 import OrderItem from '../views/OrderItem';
+import * as Store from '../database/store'
 
 type Props = StackScreenProps<RootParamList, 'Orders'>;
+type Data = { user: IUser, order: IOrder }
 
 const OrdersScreen: React.FC<Props> = ({ navigation }) => {
 
-  const [data, setData] = useState<IOrder[]>([])
+  const [data, setData] = useState<Data[]>([])
   const [searchText, setSearchText] = useState<string>()
   const isFocused = useIsFocused();
 
@@ -23,24 +24,31 @@ const OrdersScreen: React.FC<Props> = ({ navigation }) => {
   }, [isFocused, searchText])
 
   const reloadData = () => {
-    Order.find({ relations: ["user"] }).then(data => setData(filltredData(data)))
+    Store.loadUsers().then(users => {
+      let res: Data[] = []
+      for (const user of users) {
+        for (const order of user.orders) {
+          res.push({ user, order })
+        }
+      }
+      setData(filltredData(res))
+    })
   }
 
   const normalized = (string: string) => {
     return string.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, '');
   }
 
-  const filltredData = (data: IOrder[]) => {
+  const filltredData = (data: Data[]) => {
     const res = data.filter(x => {
       if (!searchText) return true;
-      if (x.user === null) return false;
 
       const search = normalized(searchText);
       const name = normalized(`${x.user.firstName}${x.user.lastName}`);
       const address = (x.user.address + x.user.city + x.user.postCode).toLocaleLowerCase().replace(/\s/g, '');
-      const date = normalized(moment(x.date).format('DD.MM.YYYY'));
-      const dateShort = normalized(moment(x.date).format('D.M.YYYY'));
-      const month = normalized(moment(x.date).format('MMMM'));
+      const date = normalized(moment(x.order.date).format('DD.MM.YYYY'));
+      const dateShort = normalized(moment(x.order.date).format('D.M.YYYY'));
+      const month = normalized(moment(x.order.date).format('MMMM'));
       console.log(dateShort, search)
       let remove = true;
 
@@ -49,17 +57,17 @@ const OrdersScreen: React.FC<Props> = ({ navigation }) => {
       }
       return !remove
     })
-    return res.sort((a, b) => b.date.getTime() - a.date.getTime())
+    return res.sort((a, b) => new Date(b.order.date).getTime() - new Date(a.order.date).getTime())
   }
 
-  const onDeleteOrder = (id: number) => {
+  const onDeleteOrder = (id: string) => {
     Alert.alert(
       'Potvrdenie vymazania',
       'Naozaj chcete tento záznam vymazať? Táto operácia je nenávratná',
       [
         {
           text: 'Áno', style: 'destructive', onPress: () => {
-            Order.delete({ id: id })
+            Store.deleteOrder(id)
               .then(() => reloadData())
               .catch(() => Alert.alert('Vyskytla sa chyba', 'Z nejakého dôvodu sa nepodaril záznam vymazať'))
           }
@@ -114,11 +122,12 @@ const OrdersScreen: React.FC<Props> = ({ navigation }) => {
             data={data}
             contentContainerStyle={{ paddingTop: 8 }}
             renderItem={({ item, index }) => {
-              const order: IOrder = item
+              const data: Data = item
               return (
                 <OrderItem
-                  onDelete={() => onDeleteOrder(order.id)}
-                  order={order} />
+                  onDelete={() => onDeleteOrder(data.order.id)}
+                  order={data.order}
+                  user={data.user} />
               )
             }}
           />

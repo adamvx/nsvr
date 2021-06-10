@@ -7,12 +7,11 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import "reflect-metadata";
-import { makeDatabaseConnection } from './database';
-import * as Settings from './database/Settings';
 import Navigator from './Navigator';
 import { EEvnentType } from './types';
 import * as Events from './utils/events';
 import 'moment/locale/sk'
+import * as Store from './database/store'
 
 function App() {
 
@@ -22,16 +21,14 @@ function App() {
   useEffect(() => {
     moment.locale('sk')
     Events.subscribe(EEvnentType.DarkMode, loadSettings)
-    makeDatabaseConnection().then(async con => {
-      await loadSettings()
+    loadSettings().then(() => {
       setLoading(false)
-    }).catch(console.error);
-
+    }).catch(console.error)
   }, [])
 
   const loadSettings = async () => {
     try {
-      const res = await Settings.findOrCreate()
+      const res = await Store.loadSettings()
       setDarkMode(res.darkMode)
     } catch (err) {
       console.error(err)

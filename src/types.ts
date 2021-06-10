@@ -1,5 +1,5 @@
 export interface IUser {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   phoneNumber: string;
@@ -10,13 +10,12 @@ export interface IUser {
 }
 
 export interface IOrder {
-  id: number
+  id: string
   volume: number;
   price: number;
   ticketId: string | null;
   date: Date;
   note: string | null;
-  user: IUser;
 }
 
 export interface IBackup {
@@ -38,10 +37,9 @@ export interface IBackup {
 }
 
 export interface ISettings {
-  id: number;
+  id: string;
   pin: number;
   darkMode: boolean;
-  createdAt: Date;
 }
 
 export enum EEvnentType {

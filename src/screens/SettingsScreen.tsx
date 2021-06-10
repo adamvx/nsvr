@@ -4,15 +4,14 @@ import Constants from 'expo-constants';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, SafeAreaView, StyleSheet, Switch, View } from 'react-native';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
-import Order from '../database/Order';
-import Settings, { findLatest } from '../database/Settings';
-import User from '../database/User';
 import { downloadDataFirebase, uploadDataFirebase } from '../firebase';
 import { mapUserToBackup } from '../firebase/backup';
 import { NoBackupInFirebaseError, NoDataToSyncError } from '../firebase/errors';
 import { RootParamList } from '../Navigator';
-import { EEvnentType, ISettings } from '../types';
+import { EEvnentType, IOrder, ISettings, IUser } from '../types';
 import * as Events from '../utils/events';
+import * as Store from '../database/store'
+import { v4 as uuid } from 'uuid';
 
 type Props = StackScreenProps<RootParamList, 'Settings'>;
 
@@ -39,7 +38,7 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   }, [])
 
   const loadSettings = () => {
-    findLatest().then(settings => {
+    Store.loadSettings().then(settings => {
       setSettings(settings)
     }).catch(console.error)
   }
@@ -49,10 +48,13 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   const onDarkModeToggle = async (val: boolean) => {
-    const res = new Settings()
-    res.pin = settings?.pin || 1111
-    res.darkMode = val
-    await res.save();
+    const res: ISettings = {
+      id: uuid(),
+      pin: settings?.pin || 1111,
+      darkMode: val
+    }
+
+    await Store.storeSettings(res)
     Events.publish(EEvnentType.DarkMode, null)
     loadSettings()
   }
@@ -63,7 +65,8 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
     }
     setLoadingIds([...loadingIds, id])
     try {
-      const users = await User.find({ relations: ["orders"] })
+
+      const users = await Store.loadUsers()
       if (users.length === 0) throw new NoDataToSyncError()
       const backup = mapUserToBackup(users)
       await uploadDataFirebase(backup)
@@ -88,39 +91,33 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const result = await downloadDataFirebase()
 
-      await User.delete({})
-      await Order.delete({})
-
+      let users: IUser[] = []
       for (const backupUser of result.users) {
-        const user = new User()
-        user.firstName = backupUser.firstName;
-        user.lastName = backupUser.lastName;
-        user.phoneNumber = backupUser.phoneNumber;
-        user.city = backupUser.city;
-        user.postCode = backupUser.postCode;
-        user.address = backupUser.address;
-        try {
-          await user.save()
-        } catch (err) {
-          Alert.alert('Err', err.name + " " + err.message)
-          return;
-        }
 
-        for (const backupOrder of backupUser.orders) {
-          const order = new Order()
-          order.volume = backupOrder.volume
-          order.price = backupOrder.price
-          order.ticketId = backupOrder.ticketId
-          order.date = backupOrder.date
-          order.note = backupOrder.note
-          order.user = user
-          try {
-            await order.save()
-          } catch (err) {
-            Alert.alert('Order error', err.name + " " + err.message)
-          }
+        const orders = backupUser.orders.map(backupOrder => {
+          return {
+            volume: backupOrder.volume,
+            price: backupOrder.price,
+            ticketId: backupOrder.ticketId,
+            date: backupOrder.date,
+            note: backupOrder.note,
+          } as IOrder
+        })
+
+        const user: IUser = {
+          id: uuid(),
+          firstName: backupUser.firstName,
+          lastName: backupUser.lastName,
+          phoneNumber: backupUser.phoneNumber,
+          city: backupUser.city,
+          postCode: backupUser.postCode,
+          address: backupUser.address,
+          orders: orders
         }
+        users.push(user)
+
       }
+      await Store.storeUsers(users);
       Alert.alert('Obnova dokončená', 'Obnova zo zálohy prebehla úspešne')
     } catch (err) {
       let message = 'Skontrolujte či máte prístup na internet a skúste znovu';

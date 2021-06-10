@@ -3,10 +3,10 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { Divider, Icon, Input, Layout, List, Text, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import User from '../database/User';
 import { RootParamList } from '../Navigator';
 import { IUser } from '../types';
 import { AddIcon, SearchIcon } from '../utils/icons';
+import * as Store from '../database/store'
 
 type Props = StackScreenProps<RootParamList, 'Home'>;
 
@@ -21,7 +21,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   }, [isFocused, searchText])
 
   const reloadData = () => {
-    User.find({}).then(data => setData(filltredData(data)))
+    Store.loadUsers().then(data => setData(filltredData(data)))
   }
 
   const filltredData = (data: IUser[]) => {
@@ -73,7 +73,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               <TouchableOpacity onPress={() => navigation.navigate('User', { userId: user.id })}>
                 <Layout style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}>
                   <Icon name={'person-outline'} style={{ width: 24, height: 24, tintColor: 'gray', marginRight: 16 }} />
-                  <View>
+                  <View style={{ flex: 1 }}>
                     <Text style={{ marginBottom: 2, fontWeight: 'bold' }} category='s1'>{user.firstName + " " + user.lastName}</Text>
                     <Text>{`${user.city} - ${user.address}`}</Text>
                   </View>

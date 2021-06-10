@@ -3,21 +3,23 @@ import { Button, Divider, Input, Layout, TopNavigation, TopNavigationAction } fr
 import { Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, SafeAreaView, StyleSheet, View } from 'react-native';
-import User from '../database/User';
 import { RootParamList } from '../Navigator';
+import { IUser } from '../types';
 import { BackIcon } from '../utils/icons';
 import { addUserSchema } from '../utils/validationSchemas';
+import * as Store from '../database/store'
+import { v4 as uuidv4 } from 'uuid';
 
 type Props = StackScreenProps<RootParamList, 'AddUser'>;
 
 const AddUserScreen: React.FC<Props> = ({ navigation, route }) => {
   const userId = route.params?.userId
   const isEdit = userId !== undefined
-  const [loadedUser, setLoadedUser] = useState<User>()
+  const [loadedUser, setLoadedUser] = useState<IUser>()
 
   useEffect(() => {
     if (userId) {
-      User.findOne({ id: userId }).then(user => {
+      Store.findUser(userId).then(user => {
         setLoadedUser(user);
       }).catch(console.error)
     }
@@ -33,16 +35,22 @@ const AddUserScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   const save = async (firstName?: string, lastName?: string, phoneNumber?: string, city?: string, postCode?: string, address?: string) => {
-    const user = isEdit && loadedUser ? loadedUser : new User()
-    user.firstName = firstName ?? ""
-    user.lastName = lastName ?? ""
-    user.phoneNumber = phoneNumber ?? ""
-    user.city = city ?? ""
-    user.postCode = postCode ?? ""
-    user.address = address ?? ""
-    user.orders = []
+    const user: IUser = {
+      id: isEdit && loadedUser ? loadedUser.id : uuidv4(),
+      firstName: firstName?.trim() ?? "",
+      lastName: lastName?.trim() ?? "",
+      phoneNumber: phoneNumber?.trim() ?? "",
+      city: city?.trim() ?? "",
+      postCode: postCode?.trim() ?? "",
+      address: address?.trim() ?? "",
+      orders: []
+    }
+
     try {
-      await user.save()
+      if (isEdit && loadedUser) {
+        await Store.deleteUser(loadedUser.id)
+      }
+      await Store.addUser(user)
       navigation.goBack()
     } catch (err) {
       Alert.alert('User', JSON.stringify(user))

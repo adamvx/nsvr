@@ -2,9 +2,9 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { Button, Divider, Icon, Input, Layout, TopNavigation } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { Alert, AppState, AppStateStatus, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, View } from 'react-native';
-import * as Settings from '../database/Settings';
-import { RootParamList } from '../Navigator';
 
+import { RootParamList } from '../Navigator';
+import * as Store from '../database/store'
 
 type Props = StackScreenProps<RootParamList, 'Login'>;
 
@@ -22,7 +22,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   const login = async () => {
-    const settings = await Settings.findLatest()
+    const settings = await Store.loadSettings()
     if (parseInt(pin) === settings?.pin) {
       navigation.navigate('MainMenu');
     }

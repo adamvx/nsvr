@@ -24,9 +24,9 @@ export type RootParamList = {
   Settings: undefined;
   Home: undefined;
   ChangePin: undefined;
-  AddUser: { userId: number } | undefined;
-  User: { userId: number };
-  AddOrder: { userId: number };
+  AddUser: { userId: string } | undefined;
+  User: { userId: string };
+  AddOrder: { userId: string };
 };
 
 const Stack = createStackNavigator<RootParamList>();
