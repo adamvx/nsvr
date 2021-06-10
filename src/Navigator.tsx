@@ -65,7 +65,7 @@ const Navigator: React.FC = () => {
 
 const MainMenuNavigator: React.FC = () => {
   return (
-    <Tab.Navigator tabBar={props => <BottomTabBar {...props} />}>
+    <Tab.Navigator backBehavior='initialRoute' tabBar={props => <BottomTabBar {...props} />}>
       <Tab.Screen name="Users" component={UserNavigator} />
       <Tab.Screen name="Orders" component={OrdersScreen} />
       <Tab.Screen name="Settings" component={SettingsNavigator} />
